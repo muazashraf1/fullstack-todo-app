@@ -34,7 +34,12 @@ function UpdateTodos() {
     }
 
     const singleTodo = async () => {
-        const fetching = await axios.get(`http://127.0.0.1:8000/api/todos/${id}/`)
+        const token = localStorage.getItem("token")
+        const fetching = await axios.get(`http://127.0.0.1:8000/api/todos/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
         setUpdateTodo(fetching.data)
     }
 
@@ -52,7 +57,18 @@ function UpdateTodos() {
 
     const handleUpdate = async () => {
         if (handleValidation()) {
-            const update = await axios.put(`http://127.0.0.1:8000/api/todos/${id}/`, updateTodo)
+            const token = localStorage.getItem("token")
+            // const update = await axios.put(`http://127.0.0.1:8000/api/todos/${id}/`, updateTodo)
+
+            const update = await axios.put(
+                `http://127.0.0.1:8000/api/todos/${id}/`,
+                updateTodo,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            )
 
             if (update.status == 200) {
                 navigate('/todos-page')

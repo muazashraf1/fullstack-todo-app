@@ -48,9 +48,25 @@ export default function CreateTodo() {
         let isValid = handleValidation()
         if (isValid) {
             try {
-                const posting = await axios.post('http://127.0.0.1:8000/api/todos/', todos)
-                // setTodos(posting.data)
-                console.log(posting.data);
+                // // const posting = await axios.post('http://127.0.0.1:8000/api/todos/', todos)
+                // const posting = await axios.post('http://127.0.0.1:8000/api/todos/', todos)
+                // // setTodos(posting.data)
+                // console.log(posting.data);
+
+
+                const token = localStorage.getItem("token")
+
+                const posting = await axios.post(
+                    'http://127.0.0.1:8000/api/todos/',
+                    todos,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                )
+
+
             } catch (err) {
                 console.error("Error adding todos:", err)
             }

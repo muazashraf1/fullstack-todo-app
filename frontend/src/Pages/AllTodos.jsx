@@ -106,23 +106,46 @@ export default function AllTodos() {
 
     const [allTodos, setAllTodos] = useState([])
 
-
-
     const fetchTodos = async () => {
-        const fetching = await axios.get('http://127.0.0.1:8000/api/todos/')
-        // setAllTodos(preData => [...preData, fetching.data]) // --> this will add array into an array
-        setAllTodos(fetching.data)
-        // console.log(fetching.data);
+        try {
+            const token = localStorage.getItem("token")
+            const response = await axios.get("http://127.0.0.1:8000/api/todos/", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            setAllTodos(response.data)
+        } catch (error) {
+            console.log(error.response?.data || error.message)
+        }
     }
-    useEffect(() => {
 
-        fetchTodos()
-    }, [])
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/login"); // ❌ agar login nahi to redirect
+        } else {
+            fetchTodos();
+        }
+    }, [navigate]);
+
+    const handleUpdate = (id) => {
+        navigate(`/update-page/${id}`)
+    }
 
     const handleDelete = async (id) => {
         try {
+            const token = localStorage.getItem("token")
 
-            const deleting = await axios.delete(`http://127.0.0.1:8000/api/todos/${id}/`)
+            const response = await axios.delete(
+                `http://127.0.0.1:8000/api/todos/${id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            )
 
 
             // ---> these will be use , when we have just one endpoint in urls.py
@@ -131,7 +154,7 @@ export default function AllTodos() {
             // const deleting = await fetch('http://127.0.0.1:8000/api/todos/',  {'id' : id})
 
 
-            if (deleting.status === 204) {
+            if (response.status === 204) {
                 fetchTodos()
             }
         } catch (error) {
@@ -140,12 +163,10 @@ export default function AllTodos() {
     }
 
 
-    const handleUpadte = (id) => {
-        // navigate(`update-page/`, {
-        //     data: { id: id }
-        // })
-        navigate(`/update-page/${id}`)
-    }
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    };
 
     // console.log(allTodos);
 
@@ -154,6 +175,10 @@ export default function AllTodos() {
 
             <button onClick={() => navigate('/')} className="absolute top-5 left-5 flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white/20 transition">
                 ← Back
+            </button>
+
+            <button onClick={handleLogout} className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 bg-red-500/20 backdrop-blur-md border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/30 transition">
+                Logout
             </button>
 
             <div className="w-full max-w-5xl backdrop-blur-lg bg-white/10 border border-white/20 shadow-xl rounded-2xl p-6">
@@ -176,7 +201,7 @@ export default function AllTodos() {
                         <tbody className="divide-y divide-white/10">
                             {allTodos.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-6 text-gray-300">
+                                    <td colSpan={5} className="text-center py-6 text-gray-300">
                                         No Todo found!
                                     </td>
                                 </tr>
@@ -213,7 +238,7 @@ export default function AllTodos() {
 
                                         <td className="py-3 px-4 text-center">
                                             <div className="flex gap-2 justify-center">
-                                                <button onClick={() => handleUpadte(todo.id)} className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition">
+                                                <button onClick={() => handleUpdate(todo.id)} className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition">
                                                     Edit
                                                 </button>
 
